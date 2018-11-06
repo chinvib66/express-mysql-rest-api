@@ -3,7 +3,7 @@ const UserModel = require('../models/user'),
       ProfileModel = require('../models/profile'),
       MeetingModel = require('../models/meeting')
 
-const sequelize = new Sequelize('db1', {
+const sequelize = new Sequelize('db1',null,null, {
   host: 'localhost',
   //dialect: 'mysql',
   dialect: 'sqlite',
