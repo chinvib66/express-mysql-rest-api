@@ -13,7 +13,7 @@ const sequelize = new Sequelize('db1',null,null, {
     acquire: 30000,
     idle: 10000
   },
-  storage: '../db1.sqlite'
+  storage: '../db1.sqlite3'
 })
 
 const User = UserModel(sequelize, Sequelize)  
