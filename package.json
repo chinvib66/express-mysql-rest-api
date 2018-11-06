@@ -1,0 +1,24 @@
+{
+  "name": "express-mysql-rest-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "dateformat": "^3.0.3",
+    "express": "^4.16.4",
+    "md5": "^2.2.1",
+    "mysql2": "^1.6.3",
+    "sequelize": "^4.41.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.6"
+  }
+}
