@@ -125,9 +125,9 @@ router.get('/posts',(req, res)=>{
 router.post('/post/create', (req, res)=>{
     Post.create({
         where:{
-            title:req.post.title,
-            content: req.post.content,
-            author: req.session.username
+            title:req.body.title,
+            content: req.body.content,
+            author: req.body.username
         }
     }).then(()=>{
         api_res.status  = 1
@@ -216,9 +216,9 @@ router.get('/forum',(req, res)=>{
 router.post('/ques/create', (req, res)=>{
     Question.create({
         where:{
-            title   :req.post.title,
-            desc    : req.post.des,
-            author  : req.session.username
+            title   :req.body.title,
+            desc    : req.body.des,
+            author  : req.body.username
         }
     }).then(()=>{
         api_res.status  = 1
