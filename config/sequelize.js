@@ -6,6 +6,7 @@ const UserModel = require('../models/user'),
       QuestionModel   = require('../models/question'),
       NoteModel   = require('../models/note');
 
+/*
 const sequelize = new Sequelize('test','root','', {
   host: 'localhost',
   dialect: 'mysql',
@@ -16,7 +17,9 @@ const sequelize = new Sequelize('test','root','', {
     idle: 10000
   }
 })
+*/
 
+const sequelize = new Sequelize('postgres://pcogqisgjnddyr:d1c882abe0f1182ebc7278a971518774bcea435e8ee7b102ff74bd41aa89ec4b@ec2-54-235-90-0.compute-1.amazonaws.com:5432/d429c57voe1fka')
 
 const User = UserModel(sequelize, Sequelize)  
 const Profile = ProfileModel(sequelize,Sequelize) 

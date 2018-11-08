@@ -5,7 +5,7 @@ const   router  = require('express').Router(),
         //passport = require('passport'),
         //Linkedin = require('node-linkedin')(process.env.LINKEDIN_ID, process.env.LINKEDIN_SECRET, process.env.LINKEDIN_CALLBACK_URL);
 
-var     {User,Profile}  = require('../config/sequelize'),
+var     {User,Profile, Post, Question, Note}  = require('../config/sequelize'),
         dateFormat      = require('dateformat');
 
 var api_res = {
@@ -13,6 +13,8 @@ var api_res = {
     value   : null,
     msg     : null,
 }
+
+// Console Logger
 router.use(function (req, res, next) {
     //console.log('Time:', (Date.now()).toDateString())
     console.log(req.method," ",req.path, " ", dateFormat(Date.now(), "isoDateTime"));
@@ -24,12 +26,14 @@ router.use(function (req, res, next) {
     next()
 })
 
+// Index Get
 router.get('/',(req,res)=>{
     api_res.status  = 1;
     api_res.msg     = 'Index Page';
     res.json(api_res);
 })
 
+// Login Get
 router.get('/login', (req, res )=>{
     api_res.status  = 1;
     api_res.value   = 0;
@@ -38,6 +42,7 @@ router.get('/login', (req, res )=>{
 
 })
 
+// Login Post
 router.post('/login', (req, res)=>{
     email       = req.body.email;
     password    = md5(req.body.password);
@@ -53,6 +58,7 @@ router.post('/login', (req, res)=>{
     .then(()=>  res.json(api_res))
 })
 
+// Register Get
 router.get('/register', (req, res)=>{
     api_res.status  = 1;
     api_res.value   = 0;
@@ -61,6 +67,7 @@ router.get('/register', (req, res)=>{
     
 })
 
+// Register Post
 router.post('/register', (req, res )=>{
     firstname   = req.body.firstname;
     lastname    = req.body.lastname;
@@ -109,6 +116,8 @@ router.post('/register', (req, res )=>{
     
 })
 
+
+// CRUD for Posts
 router.get('/posts',(req, res)=>{
     Post.findAll().then(posts =>{
         api_res.status  = 1
@@ -200,6 +209,8 @@ router.post('/post/:id/delete',(req, res)=>{
     })
 })
 
+
+// CRUD for Forum
 router.get('/forum',(req, res)=>{
     Question.findAll().then(ques =>{
         api_res.status  = 1
@@ -290,6 +301,99 @@ router.post('/ques/:id/delete',(req, res)=>{
         res.json(api_res)
     })
 })
+
+// CRUD for Notes
+router.get('/notes',(req, res)=>{
+    Note.findAll().then(notes =>{
+        api_res.status  = 1
+        api_res.value   = notes
+        api_res.msg     = "Success"
+        res.json(api_res)
+    }).catch(err=>{ 
+        api_res.value   = err
+        api_res.msg     = "Some error occured"
+        res.json(api_res)
+    })
+})
+
+router.post('/note/create', (req, res)=>{
+    Note.create({
+        where:{
+            title   :req.body.title,
+            desc    : req.body.des,
+            author  : req.body.username
+        }
+    }).then(()=>{
+        api_res.status  = 1
+        api_res.value   = 1
+        api_res.msg     = 'Post created successfully.'
+        res.json(api_res)
+
+    }).catch(err=>{
+        api_res.msg     =  'Some error occured'
+        api_res.value   =  err
+        res.json(api_res)
+    })
+})
+
+router.get('/note/:id',(req, res)=>{
+    Note.findOne({
+        where:{
+            id: req.params.id
+        }
+    }).then(note =>{
+        api_res.status  = 1
+        api_res.value   = note
+        api_res.msg     = "Success"
+        res.json(api_res)
+    }).catch(err=>{ 
+        api_res.value   = err
+        api_res.msg     = "Some error occured"
+        res.json(api_res)
+    })
+})
+
+router.post('/note/:id/update',(req, res)=>{
+    Note.findOne({
+        where: {
+            id  : req.params.id
+        }
+    }).then((note) =>{
+        note.updateAttributes({
+            where: {
+                title   : req.body.title,
+                desc    : req.body.desc
+            }
+        })
+        .then(()=>{
+        api_res.status  = 1
+        api_res.value   = 1
+        api_res.msg     = "Success"
+        res.json(api_res)})
+    }).catch(err=>{ 
+        api_res.value   = err
+        api_res.msg     = "Some error occured"
+        res.json(api_res)
+    })
+})
+
+router.post('/note/:id/delete',(req, res)=>{
+    Note.destroy({
+        where:{
+            id: req.params.id
+        }
+    }).then(() =>{
+        api_res.status  = 1
+        api_res.value   = 1
+        api_res.msg     = "Success"
+        res.json(api_res)
+    }).catch(err=>{ 
+        api_res.value   = err
+        api_res.msg     = "Some error occured"
+        res.json(api_res)
+    })
+})
+
 
 /*
 router.get('/api/linkedin',(req, res, ) => {
