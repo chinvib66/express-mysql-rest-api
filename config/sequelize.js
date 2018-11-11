@@ -1,5 +1,5 @@
-const Sequelize = require('sequelize')
-const UserModel = require('../models/user'),
+const Sequelize = require('sequelize'),
+      UserModel = require('../models/user'),
       ProfileModel = require('../models/profile'),
       MeetingModel = require('../models/meeting'),
       PostModel   = require('../models/post'),

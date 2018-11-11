@@ -30,13 +30,11 @@ module.exports = (sequelize, type) => {
         mail2:{
           type:type.STRING,
           allowNull: true,
-          unique: true,
           defaultValue: null,
         },
         mail3:{
           type:type.STRING,
           allowNull: true,
-          unique: true,
           defaultValue: null,
         },
         phone:{

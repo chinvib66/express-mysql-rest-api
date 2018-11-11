@@ -1,7 +1,10 @@
 const   router  = require('express').Router(),
         md5     = require('md5'),
+        config  = require('../jwtconfig')
         Sequelize   = require('sequelize'),
+        jwt     = require('jsonwebtoken')
         Op      = Sequelize.Op;
+
         //passport = require('passport'),
         //Linkedin = require('node-linkedin')(process.env.LINKEDIN_ID, process.env.LINKEDIN_SECRET, process.env.LINKEDIN_CALLBACK_URL);
 
@@ -12,17 +15,16 @@ var api_res = {
     status  : 0,
     value   : null,
     msg     : null,
+    token   : null
 }
 
 // Console Logger
 router.use(function (req, res, next) {
     //console.log('Time:', (Date.now()).toDateString())
     console.log(req.method," ",req.path, " ", dateFormat(Date.now(), "isoDateTime"));
-    api_res = {
-        status  : 0,
-        value   : null,
-        msg     : null,
-    }
+    api_res.status  = 0,
+    api_res.value   = null,
+    api_res.msg     = null,
     next()
 })
 
@@ -44,18 +46,38 @@ router.get('/login', (req, res )=>{
 
 // Login Post
 router.post('/login', (req, res)=>{
-    email       = req.body.email;
-    password    = md5(req.body.password);
+    
     User.findOne(
         {
             where:{
-                email   : email,
-                password: password
+                mail    : req.body.email,
+                password: req.body.password
             }
         }
-    ).then(user => user != null ? api_res.value = user : api_res.status = 0)
-    .then(()=>  api_res.status = 1)
-    .then(()=>  res.json(api_res))
+    ).then(user => {
+        
+        if(user != null){ 
+            api_res.value = user
+            token = jwt.sign({email: user.mail}, config.secret, { expiresIn: config.tokenLife})
+            api_res.token   = token
+            api_res.status = 1
+            api_res.msg     = "Signed in successfully"
+        }else 
+        {
+            api_res.status  = 0
+            api_res.value   = null
+            api_res.msg     = "Incorrect email or password. Please check and try again"
+
+        }
+    
+    })
+    .then(()=>  {return res.json(api_res)})
+    .catch(err =>{
+        api_res.status  = 0
+        api_res.value   = null
+        api_res.msg     = "Some error occured. Please try again."
+        return res.json(api_res)
+    })
 })
 
 // Register Get
@@ -68,56 +90,46 @@ router.get('/register', (req, res)=>{
 })
 
 // Register Post
-router.post('/register', (req, res )=>{
-    firstname   = req.body.firstname;
-    lastname    = req.body.lastname;
-    email       = req.body.email;
-    password    = md5(req.body.password);
-    User.findOne(
-        {
-            where:{
-                email: email,
-                password: password
-            }
-        }
-    ).then(user => {
-        if(user != null)
-        {
-            api_res.state   = 1
-            api_res.value   = 0
-            api_res.msg     = "User already exists"
-            res.json(api_res)
-            //()
-        }
-        else {
-            User.create({
-                where:{
-                    first_name  : firstname,
-                    last_name   : lastname,
-                    mail        : email,
-                    password    : password,
-                }
-            }).then(()=>{
-                api_res.msg     = 'User created successfully.'
-                res.json(api_res)
 
-            }).catch(err=>{
-                api_res.msg     =  'Some error occured'
-                api_res.value   =  err
-                res.json(api_res)
-            })
+router.post('/register', (req, res)=>{
+    User.findOrCreate({
+        where: {
+            //[Op.or]: [{mail: req.body.email }, {username: 13}]            
+            mail        : req.body.email,
+            first_name  : req.body.firstname,
+            last_name   : req.body.lastname,
+            password    : req.body.password
         }
     })
+    .spread((user, created) => {
+        //console.log(created)
+        if(created){
+            api_res.status  = 1
+            api_res.value   = "User id = "+user.id
+            api_res.msg     = "User registered successfully. Please login to continue"
+            return res.json(api_res)
+        }
+        else{
+            api_res.status  = 1
+            api_res.value   = null
+            api_res.msg     = "Email already exists. Please use another email or login"
+            return res.json(api_res)
+        }
+        }
+    )
     .catch(err=>{
-        api_res.msg     =  'Some error occured'
-        api_res.value   =  err
-        res.json(api_res) 
+        if(err.name == "SequelizeUniqueConstraintError"){
+        api_res.status  = 0
+        api_res.value   = err.errors[0].type
+        api_res.msg     = "Credentials already exist. Please try another email"
+        return res.json(api_res)
+        }
+        
+
     })
-    
 })
 
-
-// CRUD for Posts
+// No Auth
 router.get('/posts',(req, res)=>{
     Post.findAll().then(posts =>{
         api_res.status  = 1
@@ -131,16 +143,115 @@ router.get('/posts',(req, res)=>{
     })
 })
 
-router.post('/post/create', (req, res)=>{
-    Post.create({
+router.get('/post/:id',(req, res)=>{
+    Post.findOne({
         where:{
-            title:req.body.title,
-            content: req.body.content,
-            author: req.body.username
+            id: req.params.id
         }
-    }).then(()=>{
+    }).then(post =>{
+        if(post != null){
         api_res.status  = 1
-        api_res.value   = 1
+        api_res.value   = post
+        api_res.msg     = "Success"
+        res.json(api_res)
+        }
+        else {
+        api_res.status  = 1
+        api_res.value   = post
+        api_res.msg     = "Post does not exist"
+        res.json(api_res)
+        }
+    }).catch(err=>{ 
+        api_res.value   = err
+        api_res.msg     = "Some error occured"
+        res.json(api_res)
+    })
+})
+
+router.get('/forum',(req, res)=>{
+    Question.findAll().then(ques =>{
+        api_res.status  = 1
+        api_res.value   = ques
+        api_res.msg     = "Success"
+        res.json(api_res)
+    }).catch(err=>{ 
+        api_res.value   = err
+        api_res.msg     = "Some error occured"
+        res.json(api_res)
+    })
+})
+
+router.get('/ques/:id',(req, res)=>{
+    Question.findOne({
+        where:{
+            id: req.params.id
+        }
+    }).then(ques =>{
+        api_res.status  = 1
+        api_res.value   = ques
+        api_res.msg     = "Success"
+        res.json(api_res)
+    }).catch(err=>{ 
+        api_res.value   = err
+        api_res.msg     = "Some error occured"
+        res.json(api_res)
+    })
+})
+
+router.get('/notes',(req, res)=>{
+    Note.findAll().then(notes =>{
+        api_res.status  = 1
+        api_res.value   = notes
+        api_res.msg     = "Success"
+        res.json(api_res)
+    }).catch(err=>{ 
+        api_res.value   = err
+        api_res.msg     = "Some error occured"
+        res.json(api_res)
+    })
+})
+
+router.get('/note/:id',(req, res)=>{
+    Note.findOne({
+        where:{
+            id: req.params.id
+        }
+    }).then(note =>{
+        api_res.status  = 1
+        api_res.value   = note
+        api_res.msg     = "Success"
+        res.json(api_res)
+    }).catch(err=>{ 
+        api_res.value   = err
+        api_res.msg     = "Some error occured"
+        res.json(api_res)
+    })
+})
+
+// Auth using JWT
+
+router.use(require('./tokenCheck'))
+router.use((req, res, next)=>{
+    console.log(req.decoded)
+    next()
+})
+router.get('/secure',(req,res)=>{
+    api_res.status  = 1;
+    api_res.msg     = 'Secure Page';
+    res.json(api_res);
+})
+// CRUD for Posts
+
+router.post('/post/create', (req, res)=>{
+    console.log(req.body)
+    console.log(req.decoded.email)
+    Post.create({
+            title   : req.body.title,
+            content : req.body.content,
+            author  : req.decoded.email
+    }).then(val=>{
+        api_res.status  = 1
+        api_res.value   = val
         api_res.msg     = 'Post created successfully.'
         res.json(api_res)
 
@@ -151,40 +262,22 @@ router.post('/post/create', (req, res)=>{
     })
 })
 
-router.get('/post/:id',(req, res)=>{
-    Post.findOne({
-        where:{
-            id: req.params.id
-        }
-    }).then(post =>{
-        api_res.status  = 1
-        api_res.value   = post
-        api_res.msg     = "Success"
-        res.json(api_res)
-    }).catch(err=>{ 
-        api_res.value   = err
-        api_res.msg     = "Some error occured"
-        res.json(api_res)
-    })
-})
-
 router.post('/post/:id/update',(req, res)=>{
-    Post.findOne({
-        where:{
-            id: req.params.id
-        }
-    }).then((post) =>{
-        post.updateAttributes({
-            where: {
-                title   : req.body.title,
-                content : req.body.content
+    Post.update({
+            title   : req.body.title,
+            content : req.body.content
+        },
+        {
+            where :{
+                id: req.params.id,
+                author: req.decoded.email
             }
         })
-        .then(()=>{
+        .then((post)=>{
         api_res.status  = 1
-        api_res.value   = 1
-        api_res.msg     = "Success"
-        res.json(api_res)})
+        api_res.value   = post
+        api_res.msg     = "Post updated successfully"
+        res.json(api_res)
     }).catch(err=>{ 
         api_res.value   = err
         api_res.msg     = "Some error occured"
@@ -211,26 +304,12 @@ router.post('/post/:id/delete',(req, res)=>{
 
 
 // CRUD for Forum
-router.get('/forum',(req, res)=>{
-    Question.findAll().then(ques =>{
-        api_res.status  = 1
-        api_res.value   = ques
-        api_res.msg     = "Success"
-        res.json(api_res)
-    }).catch(err=>{ 
-        api_res.value   = err
-        api_res.msg     = "Some error occured"
-        res.json(api_res)
-    })
-})
 
 router.post('/ques/create', (req, res)=>{
     Question.create({
-        where:{
             title   :req.body.title,
             desc    : req.body.des,
             author  : req.body.username
-        }
     }).then(()=>{
         api_res.status  = 1
         api_res.value   = 1
@@ -244,47 +323,28 @@ router.post('/ques/create', (req, res)=>{
     })
 })
 
-router.get('/ques/:id',(req, res)=>{
-    Question.findOne({
-        where:{
-            id: req.params.id
-        }
-    }).then(ques =>{
-        api_res.status  = 1
-        api_res.value   = ques
-        api_res.msg     = "Success"
-        res.json(api_res)
-    }).catch(err=>{ 
-        api_res.value   = err
-        api_res.msg     = "Some error occured"
-        res.json(api_res)
-    })
-})
-
 router.post('/ques/:id/update',(req, res)=>{
-    Question.findOne({
-        where: {
-            id  : req.params.id
+    Question.update({
+        title   : req.body.title,
+        desc    : req.body.desc
+    },
+    {
+        where :{
+            id: req.params.id,
+            author: req.decoded.email
         }
-    }).then((ques) =>{
-        ques.updateAttributes({
-            where: {
-                title   : req.body.title,
-                desc    : req.body.desc
-            }
-        })
-        .then(()=>{
-        api_res.status  = 1
-        api_res.value   = 1
-        api_res.msg     = "Success"
-        res.json(api_res)})
-    }).catch(err=>{ 
-        api_res.value   = err
-        api_res.msg     = "Some error occured"
-        res.json(api_res)
     })
+    .then((ques)=>{
+    api_res.status  = 1
+    api_res.value   = ques
+    api_res.msg     = "Question updated successfully"
+    res.json(api_res)
+}).catch(err=>{ 
+    api_res.value   = err
+    api_res.msg     = "Some error occured"
+    res.json(api_res)
 })
-
+})
 router.post('/ques/:id/delete',(req, res)=>{
     Question.destroy({
         where:{
@@ -303,26 +363,12 @@ router.post('/ques/:id/delete',(req, res)=>{
 })
 
 // CRUD for Notes
-router.get('/notes',(req, res)=>{
-    Note.findAll().then(notes =>{
-        api_res.status  = 1
-        api_res.value   = notes
-        api_res.msg     = "Success"
-        res.json(api_res)
-    }).catch(err=>{ 
-        api_res.value   = err
-        api_res.msg     = "Some error occured"
-        res.json(api_res)
-    })
-})
 
 router.post('/note/create', (req, res)=>{
     Note.create({
-        where:{
             title   :req.body.title,
             desc    : req.body.des,
             author  : req.body.username
-        }
     }).then(()=>{
         api_res.status  = 1
         api_res.value   = 1
@@ -336,45 +382,26 @@ router.post('/note/create', (req, res)=>{
     })
 })
 
-router.get('/note/:id',(req, res)=>{
-    Note.findOne({
-        where:{
-            id: req.params.id
+router.post('/note/:id/update',(req, res)=>{
+    Note.update({
+        content    : req.body.content
+    },
+    {
+        where :{
+            id: req.params.id,
+            author: req.decoded.email
         }
-    }).then(note =>{
+    })
+    .then((note)=>{
         api_res.status  = 1
         api_res.value   = note
-        api_res.msg     = "Success"
+        api_res.msg     = "Note updated successfully"
         res.json(api_res)
     }).catch(err=>{ 
         api_res.value   = err
         api_res.msg     = "Some error occured"
         res.json(api_res)
-    })
 })
-
-router.post('/note/:id/update',(req, res)=>{
-    Note.findOne({
-        where: {
-            id  : req.params.id
-        }
-    }).then((note) =>{
-        note.updateAttributes({
-            where: {
-                title   : req.body.title,
-                desc    : req.body.desc
-            }
-        })
-        .then(()=>{
-        api_res.status  = 1
-        api_res.value   = 1
-        api_res.msg     = "Success"
-        res.json(api_res)})
-    }).catch(err=>{ 
-        api_res.value   = err
-        api_res.msg     = "Some error occured"
-        res.json(api_res)
-    })
 })
 
 router.post('/note/:id/delete',(req, res)=>{
