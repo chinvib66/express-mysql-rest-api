@@ -1,2 +1,3 @@
 node_modules
 jwtconfig.json
+routes/gUser.js
