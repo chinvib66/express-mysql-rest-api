@@ -1,0 +1,9 @@
+{
+    "secret": "jwt-chinvib66-secret",
+    "refreshTokenSecret": "jwt-chinvib66-secret-refresh",
+    "port": 3000,
+    "tokenLife": 900,
+    "refreshTokenLife": 86400,
+    "gClientId": "218171654775-qs4e5i7vb7bljb1k1vls4rdluqbepn2v.apps.googleusercontent.com",
+    "gClientSecret": "YzEs7EmNVK4zsTtH36J8m88w"
+}
