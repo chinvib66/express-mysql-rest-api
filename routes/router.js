@@ -1,11 +1,10 @@
 const   router  = require('express').Router(),
         md5     = require('md5'),
-        config  = require('../jwtconfig')
+        config  = require('../jwtconfig'),
         Sequelize   = require('sequelize'),
-        jwt     = require('jsonwebtoken')
-        Op      = Sequelize.Op;
-
-        //passport = require('passport'),
+        jwt     = require('jsonwebtoken'),
+        Op      = Sequelize.Op,
+        passport = require('passport');
         //Linkedin = require('node-linkedin')(process.env.LINKEDIN_ID, process.env.LINKEDIN_SECRET, process.env.LINKEDIN_CALLBACK_URL);
 
 var     {User,Profile, Post, Question, Note}  = require('../config/sequelize'),
@@ -17,7 +16,6 @@ var api_res = {
     msg     : null,
     token   : null
 }
-
 // Console Logger
 router.use(function (req, res, next) {
     //console.log('Time:', (Date.now()).toDateString())
@@ -62,7 +60,8 @@ router.post('/login', (req, res)=>{
             api_res.token   = token
             api_res.status = 1
             api_res.msg     = "Signed in successfully"
-        }else 
+        }
+        else
         {
             api_res.status  = 0
             api_res.value   = null
@@ -95,10 +94,9 @@ router.post('/register', (req, res)=>{
     User.findOrCreate({
         where: {
             //[Op.or]: [{mail: req.body.email }, {username: 13}]            
-            mail        : req.body.email,
-            first_name  : req.body.firstname,
-            last_name   : req.body.lastname,
-            password    : req.body.password
+            mail    : req.body.email,
+            name    : req.body.fullName,
+            password: req.body.password
         }
     })
     .spread((user, created) => {
@@ -119,15 +117,25 @@ router.post('/register', (req, res)=>{
     )
     .catch(err=>{
         if(err.name == "SequelizeUniqueConstraintError"){
-        api_res.status  = 0
-        api_res.value   = err.errors[0].type
-        api_res.msg     = "Credentials already exist. Please try another email"
-        return res.json(api_res)
+            api_res.status  = 0
+            api_res.value   = err.errors[0].type
+            api_res.msg     = "Credentials already exist. Please try another email"
+            console.log(err)
+            return res.json(api_res)
+        }
+        else{
+            api_res.status  = 0
+            api_res.value   = err.errors[0].type
+            api_res.msg     = "Some Error occured on our side. We'll try to fix it ASAP."
+            console.log(err)
+            return res.json(api_res)
         }
         
 
     })
 })
+
+
 
 // No Auth
 router.get('/posts',(req, res)=>{
@@ -228,6 +236,9 @@ router.get('/note/:id',(req, res)=>{
     })
 })
 
+
+
+
 // Auth using JWT
 
 router.use(require('./tokenCheck'))
@@ -240,6 +251,7 @@ router.get('/secure',(req,res)=>{
     api_res.msg     = 'Secure Page';
     res.json(api_res);
 })
+
 // CRUD for Posts
 
 router.post('/post/create', (req, res)=>{
@@ -302,7 +314,6 @@ router.post('/post/:id/delete',(req, res)=>{
     })
 })
 
-
 // CRUD for Forum
 
 router.post('/ques/create', (req, res)=>{
@@ -345,6 +356,7 @@ router.post('/ques/:id/update',(req, res)=>{
     res.json(api_res)
 })
 })
+
 router.post('/ques/:id/delete',(req, res)=>{
     Question.destroy({
         where:{

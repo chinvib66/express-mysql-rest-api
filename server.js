@@ -4,7 +4,7 @@ const express = require('express');
     cors = require('cors'),
     path = require('path');//,
     //session = require('express-session');
-    //passport = require('passport');
+    var passport = require('passport');
 
 
 const app = express();
@@ -15,6 +15,7 @@ app.use(cors());
 // Body parser middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(passport.initialize());
 
 // Views dir set
 //app.set('views', path.join(__dirname, 'views'));

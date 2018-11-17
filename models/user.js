@@ -6,21 +6,22 @@ module.exports = (sequelize, type) => {
           autoIncrement: true,
           unique: true,
         },
-        first_name: {
+        name: {
          type:  type.STRING,
          allowNull: true,
          defaultValue:null,
         },
-        last_name: {
-          type:  type.STRING,
-          allowNull: true,
-          defaultValue:null,
-         },
+        
         linkedinId: {
           type: type.STRING,
           allowNull: true,
           defaultValue:null,
           //unique: true, check in api
+        },
+        googleId: {
+          type: type.STRING,
+          allowNull: true,
+          defaultValue:null,
         },
         mail:{
           type:type.STRING,
