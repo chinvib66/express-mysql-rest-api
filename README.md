@@ -22,4 +22,9 @@ If user exists, User data will be displayed for debugging purposes and JWT will 
 Else, status 0 will be shown.
 
 ### CRUD for Post, Question, Note
-#### GET request to fetch all Posts/Questions
+
+endpoints: 
+      /api/posts
+      /api/forum
+      /api/post/:id
+      /api/ques/:id
