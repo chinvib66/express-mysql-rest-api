@@ -24,7 +24,7 @@ Else, status 0 will be shown.
 ### CRUD for Post, Question, Note
 
 endpoints: 
-      /api/posts
-      /api/forum
-      /api/post/:id
-      /api/ques/:id
+      /api/posts;
+      /api/forum;
+      /api/post/:id;
+      /api/ques/:id;
