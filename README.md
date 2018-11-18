@@ -1,4 +1,4 @@
-# Express MySql/PostGRE Sql REST Api.
+# Express MySql/PostgreSql REST Api.
 
 Simple REST Api.
 
