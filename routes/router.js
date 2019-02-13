@@ -206,37 +206,6 @@ router.get('/ques/:id',(req, res)=>{
     })
 })
 
-router.get('/notes',(req, res)=>{
-    Note.findAll().then(notes =>{
-        api_res.status  = 1
-        api_res.value   = notes
-        api_res.msg     = "Success"
-        res.json(api_res)
-    }).catch(err=>{ 
-        api_res.value   = err
-        api_res.msg     = "Some error occured"
-        res.json(api_res)
-    })
-})
-
-router.get('/note/:id',(req, res)=>{
-    Note.findOne({
-        where:{
-            id: req.params.id
-        }
-    }).then(note =>{
-        api_res.status  = 1
-        api_res.value   = note
-        api_res.msg     = "Success"
-        res.json(api_res)
-    }).catch(err=>{ 
-        api_res.value   = err
-        api_res.msg     = "Some error occured"
-        res.json(api_res)
-    })
-})
-
-
 
 
 // Auth using JWT
@@ -320,7 +289,7 @@ router.post('/ques/create', (req, res)=>{
     Question.create({
             title   :req.body.title,
             desc    : req.body.des,
-            author  : req.body.username
+            author  : req.encoded.email
     }).then(()=>{
         api_res.status  = 1
         api_res.value   = 1
@@ -380,7 +349,7 @@ router.post('/note/create', (req, res)=>{
     Note.create({
             title   :req.body.title,
             desc    : req.body.des,
-            author  : req.body.username
+            author  : req.decoded.email
     }).then(()=>{
         api_res.status  = 1
         api_res.value   = 1
@@ -419,7 +388,8 @@ router.post('/note/:id/update',(req, res)=>{
 router.post('/note/:id/delete',(req, res)=>{
     Note.destroy({
         where:{
-            id: req.params.id
+            id: req.params.id,
+            author: req.decoded.email
         }
     }).then(() =>{
         api_res.status  = 1
@@ -432,6 +402,44 @@ router.post('/note/:id/delete',(req, res)=>{
         res.json(api_res)
     })
 })
+
+
+router.get('/notes',(req, res)=>{
+    Note.findAll({
+        where:{
+            author: req.decoded.email,
+        }
+    }).then(notes =>{
+        api_res.status  = 1
+        api_res.value   = notes
+        api_res.msg     = "Success"
+        res.json(api_res)
+    }).catch(err=>{ 
+        api_res.value   = err
+        api_res.msg     = "Some error occured"
+        res.json(api_res)
+    })
+})
+
+router.get('/note/:id',(req, res)=>{
+    Note.findOne({
+        where:{
+            id: req.params.id,
+            author : req.decoded.email
+        }
+    }).then(note =>{
+        api_res.status  = 1
+        api_res.value   = note
+        api_res.msg     = "Success"
+        res.json(api_res)
+    }).catch(err=>{ 
+        api_res.value   = err
+        api_res.msg     = "Some error occured"
+        res.json(api_res)
+    })
+})
+
+
 
 
 /*
