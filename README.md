@@ -10,14 +10,14 @@ Deployed to Heroku: express-mysql-rest-api.herokuapp.com
 
 
 ### Registration Endpoint:
-endpoint: /api/register, POST request.
-send a POST request with fields: fullName, email, password.
+endpoint: /api/register, POST request.<br>
+Send a POST request with fields: fullName, email, password.
 If user already exists, msg will be displayed. *User data will also be displayed for debugging purposes*
 Else, new user will be created.
 
 ### Login Endpoint:
-endpoint: /api/login, POST request.
-send a POST request with fields: email, password.
+endpoint: /api/login, POST request.<br>
+Send a POST request with fields: email, password.
 If user exists, User data will be displayed for debugging purposes and JWT will be assigned
 Else, status 0 will be shown.
 
