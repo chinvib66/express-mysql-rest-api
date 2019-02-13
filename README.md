@@ -25,25 +25,25 @@ Else, status 0 will be shown.
 
 Create:<br>
       This requires jwt 'token' to be passed either as form-data, headers
-      1. Posts: Send POST request to '/api/post/create' with form data containing title, content. A blog post will be created.
-      2. Question: Send POST request to '/api/ques/create' with form data containing title, des. A forum question will be created
-      3. Note: Send POST request to '/api/note/create' with form data containing title, des. A note will be created
+      <br>1. Posts: Send POST request to '/api/post/create' with form data containing title, content. A blog post will be created.
+      <br>2. Question: Send POST request to '/api/ques/create' with form data containing title, des. A forum question will be created
+      <br>3. Note: Send POST request to '/api/note/create' with form data containing title, des. A note will be created
 
 Read:<br>
       Auth not required. Fetches data as json object.
-      1. Posts: Send GET request to '/api/posts' or '/api/post/:id'. 
-      2. Question: Send GET request to '/api/forum' or '/api/post/:id'.
+      <br>1. Posts: Send GET request to '/api/posts' or '/api/post/:id'. 
+      <br>2. Question: Send GET request to '/api/forum' or '/api/post/:id'.
       Auth required. Pass jwt token in headers.
-      3. Note: Send GET request to '/api/notes' or '/api/note/:id'.
+      <br>3. Note: Send GET request to '/api/notes' or '/api/note/:id'.
 
 Update: <br>
       This requires jwt 'token' to be passed either as form-data, headers
-      1. Posts: Send POST request to '/api/post/:id/update' with form data containing title, content. A blog post will be updated.
-      2. Question: Send POST request to '/api/ques/:id/update' with form data containing title, des. A forum question will be updated
-      3. Note: Send POST request to '/api/note/:id/update' with form data containing title, des. A note will be updated
+      <br>1. Posts: Send POST request to '/api/post/:id/update' with form data containing title, content. A blog post will be updated.
+      <br>2. Question: Send POST request to '/api/ques/:id/update' with form data containing title, des. A forum question will be updated
+      <br>3. Note: Send POST request to '/api/note/:id/update' with form data containing title, des. A note will be updated
 
 Delete: <br>
       This requires jwt 'token' to be passed either as form-data, headers
-      1. Posts: Send POST request to '/api/post/:id/delete'  Blog post will be deleted.
-      2. Question: Send POST request to '/api/ques/:id/delete'  Forum question will be deleted
-      3. Note: Send POST request to '/api/note/:id/delete'  Note will be deleted
+      <br>1. Posts: Send POST request to '/api/post/:id/delete'  Blog post will be deleted.
+      <br>2. Question: Send POST request to '/api/ques/:id/delete'  Forum question will be deleted
+      <br>3. Note: Send POST request to '/api/note/:id/delete'  Note will be deleted
