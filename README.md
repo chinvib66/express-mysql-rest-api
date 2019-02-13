@@ -32,8 +32,8 @@ Create:<br>
 Read:<br>
       Auth not required. Fetches data as json object.
       <br>1. Posts: Send GET request to '/api/posts' or '/api/post/:id'. 
-      <br>2. Question: Send GET request to '/api/forum' or '/api/post/:id'.
-      Auth required. Pass jwt token in headers.
+      <br>2. Question: Send GET request to '/api/forum' or '/api/post/:id'.<br>
+      *Auth required. Pass jwt token in headers.*
       <br>3. Note: Send GET request to '/api/notes' or '/api/note/:id'.
 
 Update: <br>
